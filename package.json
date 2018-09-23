@@ -3,15 +3,22 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "bs58": "^4.0.1",
     "immutability-helper": "^2.8.1",
     "react": "^16.5.2",
     "react-dom": "^16.5.2",
-    "react-scripts": "1.1.5"
+    "react-scripts": "1.1.5",
+    "truffle-hdwallet-provider": "^0.0.6"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "network-extract": "npx truffle networks --clean && npx tnt extractNetworks",
+    "network-inject": "npx tnt injectNetworks"
+  },
+  "devDependencies": {
+    "@gnosis.pm/truffle-nice-tools": "^1.1.3"
   }
 }
