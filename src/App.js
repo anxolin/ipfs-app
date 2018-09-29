@@ -9,7 +9,8 @@ class App extends Component {
   constructor (props) {
     super(props)
     this.state = {
-      ipfsHash: null,
+      ready: false,
+      ipfsHash: 'QmUSJ5bcfrau8uBA51eRpi4MmBxdHueo1fC7HNHVMDsuZQ',
       statusMessage: {
         type: null, // info, error, warning, success
         value: null // status message
@@ -26,6 +27,7 @@ class App extends Component {
 
   componentDidMount () {
     this.getIpfsInfo()
+    this.loadData()
   }
 
   getIpfsInfo () {
@@ -33,12 +35,36 @@ class App extends Component {
       .then(ipfsInfo => {
         console.log('Ipfs info: ', ipfsInfo)
       })
-      .catch(error => this.setState({
-        statusMessage: {
-          type: 'error',
-          value: 'Error getting info from IPFS: ' + error
-        }
-      }))
+      .catch(error => {
+        console.error(error)
+        this.setState({
+          statusMessage: {
+            type: 'error',
+            value: 'Error getting info from IPFS: ' + error
+          }
+        })
+      })
+  }
+
+  loadData () {
+    const hash = this.state.ipfsHash
+    ipfs.cat(hash)
+      .then(file => {
+        const appData = JSON.parse(file.toString('utf8'))
+        this.setState({
+          ready: true,
+          items: appData.items
+        })
+      })
+      .catch(error => {
+        console.error(error)
+        this.setState({
+          statusMessage: {
+            type: 'error',
+            value: `Error getting the content from IPFS (${hash}): ${error}`
+          }
+        })
+      })
   }
 
   clearStatusMessage () {
@@ -87,7 +113,7 @@ class App extends Component {
     }
   }
 
-  async saveChanges () {
+  saveChanges () {
     const appData = {
       items: this.state.items
     }
@@ -111,12 +137,11 @@ class App extends Component {
         this.setState({
           statusMessage: {
             type: 'error',
-            value: 'Error saving the list in IFFS: ' + error.message
+            value: 'Error saving the list in IFFS: ' + error
           }
         })
         console.error(error)
       })
-    const { hash } = await ipfs.add(content)
   }
 
   render() {
@@ -130,13 +155,14 @@ class App extends Component {
         )}
         <Todo
           items={ this.state.items }
+          loading={ !this.state.ready }
           onAddItem={ this.onAddItem }
           onDeleteItem={ this.onDeleteItem }
           onToggleItem={ this.onToggleItem }
         />
         <div className="buttons">
           <button
-            disabled={ !this.state.hasChanges }
+            disabled={ !this.state.ready || !this.state.hasChanges }
             onClick={ this.saveChanges }
             className="btn saveBtn">
               { this.state.ipfsHash ? 'Save changes' : 'Publish todo list' }

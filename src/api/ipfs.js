@@ -8,5 +8,6 @@ const ipfs = ipfsAPI({
 
 export default {
   getId: () => promisify(ipfs.id, []),
-  add: (data, options) => promisify(ipfs.add, [ data, options ])
+  add: (data, options) => promisify(ipfs.add, [ data, options ]),
+  cat: (ipfsHash, options) => promisify(ipfs.cat, [ ipfsHash, options || {} ])
 }

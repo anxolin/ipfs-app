@@ -38,18 +38,25 @@ class Todo extends React.Component {
   }
 
   render () {
-    const items = this.props.items.map((item, index) => (
-      <li
-        key={ index }
-        className={ item.done ? 'checked' : '' }
-        onClick={ event => this.onToggleItem(event, item) }
-      >
-        { item.value }
-        <span className="close" onClick={ event => this.onDeleteItem(event, item) }>
-          &times;
-        </span>
-      </li>
-    ))
+    let items
+    if (this.props.loading) {
+      items = (
+        <li>loading...</li>
+      )
+    } else {
+      items = this.props.items.map((item, index) => (
+        <li
+          key={ index }
+          className={ item.done ? 'checked' : '' }
+          onClick={ event => this.onToggleItem(event, item) }
+        >
+          { item.value }
+          <span className="close" onClick={ event => this.onDeleteItem(event, item) }>
+            &times;
+          </span>
+        </li>
+      ))
+    }
 
     return (
       <div className="todo">
