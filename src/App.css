@@ -61,6 +61,7 @@ ul li.checked::before {
   right: 0;
   top: 0;
   padding: 12px 16px 12px 16px;
+  cursor: pointer;
 }
 
 .close:hover {
@@ -70,7 +71,7 @@ ul li.checked::before {
 
 /* Style the header */
 .header {
-  background-color: #0d0623;
+  background-color: #63698a;
   padding: 30px 40px;
   color: white;
   text-align: center;
@@ -133,4 +134,33 @@ input {
 .buttons {
   padding: 1.5em;
   text-align: right
+}
+
+
+.alert {
+  padding: 1.2em;
+  text-align: center;
+  background-color: #ffd55a;
+  color: white;
+  font-size: 1.3em;
+}
+
+.alert.success {
+  background-color: #84f78e;
+  color: #00820c;
+}
+
+.alert.info {
+  background-color: #fffda7;
+  color: #6e7106;
+}
+
+.alert.warning {
+  background-color: #ffd55a;
+  color: #ce591c;
+}
+
+.alert.error {
+  background-color: #efb0b5;
+  color: #90000b;
 }

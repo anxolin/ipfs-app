@@ -3,27 +3,32 @@ import Todo from './components/todo/Todo'
 import update from 'immutability-helper';
 import './App.css';
 
-
 class App extends Component {
   constructor (props) {
     super(props)
     this.state = {
+      ipfsReady: false,
+      statusMessage: {
+        type: null, // info, error, warning, success
+        value: null // status message
+      },
       hasChanges: false,
-      items: [{
-        value: 'item 1',
-        done: false
-      }, {
-        value: 'item 2',
-        done: false
-      }, {
-        value: 'item 3',
-        done: true
-      }]
+      items: []
     }
+    this.clearStatusMessage = this.clearStatusMessage.bind(this)
     this.onAddItem = this.onAddItem.bind(this)
     this.onDeleteItem = this.onDeleteItem.bind(this)
     this.onToggleItem = this.onToggleItem.bind(this)
     this.saveChanges = this.saveChanges.bind(this)
+  }
+
+  clearStatusMessage () {
+    this.setState({
+      statusMessage: {
+        type: null,
+        value: null
+      }
+    })
   }
 
   onAddItem (value) {    
@@ -64,12 +69,20 @@ class App extends Component {
   }
 
   saveChanges () {
-    alert('save')
+    console.log({
+      items: this.state.items
+    })
   }
 
   render() {
     return (
       <div className="App">
+        { this.state.statusMessage.value && (
+          <div className={ 'alert ' + this.state.statusMessage.type }>
+            <span onClick={ this.clearStatusMessage } className="close">&times;</span>
+            { this.state.statusMessage.value }
+          </div>
+        )}
         <Todo
           items={ this.state.items }
           onAddItem={ this.onAddItem }
