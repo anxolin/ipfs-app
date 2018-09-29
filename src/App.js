@@ -1,13 +1,15 @@
 import React, { Component } from 'react';
 import Todo from './components/todo/Todo'
+import ipfs from './api/ipfs'
 import update from 'immutability-helper';
+import { Buffer } from 'buffer'
 import './App.css';
 
 class App extends Component {
   constructor (props) {
     super(props)
     this.state = {
-      ipfsReady: false,
+      ipfsHash: null,
       statusMessage: {
         type: null, // info, error, warning, success
         value: null // status message
@@ -20,6 +22,23 @@ class App extends Component {
     this.onDeleteItem = this.onDeleteItem.bind(this)
     this.onToggleItem = this.onToggleItem.bind(this)
     this.saveChanges = this.saveChanges.bind(this)
+  }
+
+  componentDidMount () {
+    this.getIpfsInfo()
+  }
+
+  getIpfsInfo () {
+    ipfs.getId()
+      .then(ipfsInfo => {
+        console.log('Ipfs info: ', ipfsInfo)
+      })
+      .catch(error => this.setState({
+        statusMessage: {
+          type: 'error',
+          value: 'Error getting info from IPFS: ' + error
+        }
+      }))
   }
 
   clearStatusMessage () {
@@ -68,10 +87,36 @@ class App extends Component {
     }
   }
 
-  saveChanges () {
-    console.log({
+  async saveChanges () {
+    const appData = {
       items: this.state.items
-    })
+    }
+    console.log(appData)
+    const content = Buffer.from(JSON.stringify(appData))
+    console.log(content)
+    ipfs.add(content)
+      .then(addResult => {
+        console.log(addResult)
+        const [{ hash }] = addResult
+        this.setState({
+          statusMessage: {
+            type: 'success',
+            value: 'Todo list was saved in IPFS with hash ' + hash
+          },
+          ipfsHash: hash,
+          hasChanges: false
+        })
+      })
+      .catch(error => {
+        this.setState({
+          statusMessage: {
+            type: 'error',
+            value: 'Error saving the list in IFFS: ' + error.message
+          }
+        })
+        console.error(error)
+      })
+    const { hash } = await ipfs.add(content)
   }
 
   render() {
@@ -94,7 +139,7 @@ class App extends Component {
             disabled={ !this.state.hasChanges }
             onClick={ this.saveChanges }
             className="btn saveBtn">
-              Save changes
+              { this.state.ipfsHash ? 'Save changes' : 'Publish todo list' }
           </button>
         </div>
       </div>
