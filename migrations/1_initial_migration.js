@@ -1,5 +1,8 @@
-var Migrations = artifacts.require("./Migrations.sol");
+/* global artifacts */
+/* eslint no-undef: "error" */
+
+var Migrations = artifacts.require("./Migrations.sol")
 
 module.exports = function(deployer) {
-  deployer.deploy(Migrations);
-};
+  deployer.deploy(Migrations)
+}

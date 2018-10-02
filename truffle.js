@@ -49,9 +49,17 @@ function truffleConfig ({
         gasPrice
       }
     },
-    solc: {
-      optimizer: {
-        enabled: optimizedEnabled
+    compilers: {
+      solc: {
+        version: "0.4.24",   // Any published image name
+        docker: true,
+        settings: {
+          optimizer: {
+            enabled: false, // Default: false
+            runs: 200
+          },
+          evmVersion: "byzantium"  // Default: "byzantium". Others:  "homestead", ...
+        }
       }
     }
   };
