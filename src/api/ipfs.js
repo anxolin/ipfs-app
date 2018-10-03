@@ -1,6 +1,6 @@
 import ipfsAPI from 'ipfs-api'
-import promisify from 'js-promisify'
 
+import promisify from 'js-promisify'
 const ipfs = ipfsAPI({
   host: 'ipfs.infura.io',
   protocol: 'https'

@@ -1,0 +1,106 @@
+[
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "versions",
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "ipfsHashes",
+    "outputs": [
+      {
+        "name": "hashFunction",
+        "type": "uint8"
+      },
+      {
+        "name": "size",
+        "type": "uint256"
+      },
+      {
+        "name": "hash",
+        "type": "bytes32"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "name": "hashFunction",
+        "type": "uint8"
+      },
+      {
+        "indexed": false,
+        "name": "size",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "name": "hash",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "name": "version",
+        "type": "uint256"
+      }
+    ],
+    "name": "UpdatedIpfsHash",
+    "type": "event"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "hashFunction",
+        "type": "uint8"
+      },
+      {
+        "name": "size",
+        "type": "uint256"
+      },
+      {
+        "name": "newHash",
+        "type": "bytes32"
+      },
+      {
+        "name": "currentVersion",
+        "type": "uint256"
+      }
+    ],
+    "name": "updateIpfsHash",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+]

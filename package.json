@@ -2,7 +2,7 @@
   "name": "ipfs-app",
   "version": "0.1.0",
   "private": true,
-  "dependencies": {    
+  "dependencies": {
     "bs58": "^4.0.1",
     "buffer": "^5.2.1",
     "immutability-helper": "^2.8.1",
@@ -11,7 +11,8 @@
     "react": "^16.5.2",
     "react-dom": "^16.5.2",
     "react-scripts": "1.1.5",
-    "truffle-hdwallet-provider": "^0.0.6"
+    "truffle-hdwallet-provider": "^1.0.0-web3one.0",
+    "web3": "^1.0.0-beta.36"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -22,7 +23,7 @@
     "network-inject": "npx tnt injectNetworks",
     "compile": "truffle compile",
     "migrate": "truffle migrate",
-    "network": "truffle networks"
+    "networks": "truffle networks"
   },
   "devDependencies": {
     "@gnosis.pm/truffle-nice-tools": "^1.1.3",

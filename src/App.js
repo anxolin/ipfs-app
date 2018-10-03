@@ -1,7 +1,10 @@
 import React, { Component } from 'react';
 import Todo from './components/todo/Todo'
 import ipfs from './api/ipfs'
-import update from 'immutability-helper';
+import web3 from './util/web3'
+import multihash from './util/multihash'
+import todoApp from './api/todoApp/todoAppWeb3'
+import update from 'immutability-helper'
 import { Buffer } from 'buffer'
 import './App.css';
 
@@ -10,6 +13,7 @@ class App extends Component {
     super(props)
     this.state = {
       ready: false,
+      account: null,
       ipfsHash: 'QmUSJ5bcfrau8uBA51eRpi4MmBxdHueo1fC7HNHVMDsuZQ',
       statusMessage: {
         type: null, // info, error, warning, success
@@ -46,25 +50,84 @@ class App extends Component {
       })
   }
 
-  loadData () {
-    const hash = this.state.ipfsHash
-    ipfs.cat(hash)
-      .then(file => {
-        const appData = JSON.parse(file.toString('utf8'))
+  loadAccount () {
+    console.log('Load account')
+    return web3.eth.getAccounts()
+      .then(([ account ]) => {
         this.setState({
-          ready: true,
-          items: appData.items
+          account
         })
+        return account
       })
+  }
+
+  loadHashByAccount (account) {
+    console.log('[loadHashByAccount] Get hash for user ', account)
+    return todoApp
+      .methods
+      .ipfsHashes(account).call().then(multihashResult => {
+        console.log('[loadHashByAccount] Multihash returned from smart contract', multihashResult)
+        if (multihashResult.size === '0') {
+          console.log('[loadHashByAccount] No result')
+          return null
+        } else {          
+          const ipfsHash = multihash.getMultihashFromBytes32(multihashResult)
+          console.log('[loadHashByAccount] Hash ipfsHash', ipfsHash)
+          this.setState({
+            ipfsHash
+          })
+  
+          return ipfsHash
+        }
+      })
+  }
+
+  loadIpfsByHash (hash) {
+    if (hash) {
+      return ipfs.cat(hash)
+        .then(file => {
+          const appData = JSON.parse(file.toString('utf8'))
+          this.setState({
+            ready: true,
+            items: appData.items
+          })
+  
+          return appData
+        })
+    } else {
+      this.setState({
+        ready: true,
+        items: []
+      })
+    }
+      // .catch(error => {
+      //   console.error(error)
+      //   this.setState({
+      //     statusMessage: {
+      //       type: 'error',
+      //       value: `Error getting the content from IPFS (${hash}): ${error}`
+      //     }
+      //   })
+      // })
+  }
+
+  loadData () {
+    console.log('loadData')
+    // const hash = this.state.ipfsHash
+    this.loadAccount()
+      .then(account => this.loadHashByAccount(account))
+      .then(hash => this.loadIpfsByHash(hash))
       .catch(error => {
         console.error(error)
         this.setState({
           statusMessage: {
             type: 'error',
-            value: `Error getting the content from IPFS (${hash}): ${error}`
+            value: 'Error Loading the data: ' + error
           }
         })
       })
+
+    
   }
 
   clearStatusMessage () {
