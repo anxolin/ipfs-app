@@ -50,20 +50,28 @@ class Todo extends React.Component {
         <li
           key={ index }
           className={ item.done ? 'checked' : '' }
-          onClick={ event => this.onToggleItem(event, item) }
+          onClick={ event => {
+            if (this.props.editable){
+              this.onToggleItem(event, item)
+            }
+          }}
         >
           { item.value }
-          <span className="close" onClick={ event => this.onDeleteItem(event, item) }>
-            &times;
-          </span>
+          { this.props.editable && (
+            <span className="close" onClick={ event => this.onDeleteItem(event, item) }>
+              &times;
+            </span>
+          )}
         </li>
       ))
     }
 
     return (
       <div className="todo">
-        <div className="header">
-          <h2>✔️ Decentralized <strong>To Do</strong> list</h2>
+        <div className="header">        
+          <h2>
+            <span role="img" aria-label="">✔️</span>&nbsp;
+            Decentralized <strong>To Do</strong> list</h2>
           <input          
             value={ this.state.newItem }
             onChange={ event => this.setState({ newItem: event.target.value }) }

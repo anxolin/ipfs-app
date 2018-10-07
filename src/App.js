@@ -153,7 +153,7 @@ class App extends Component {
       console.log('[App:initializeApp] Data is ready', appData)
       this.setState({
         dataReady: true,
-        items: appData.items || [],
+        items: appData.data.items || [],
         ipfsHash: appData.hash,
         version: appData.version
       })
@@ -184,7 +184,7 @@ class App extends Component {
       })
       .then(saveResult => {
         const transactionHash = saveResult.tx.transactionHash
-        console.log('[saveHashEthereum] The transaction %s has been mined', transactionHash, saveResult.tx)
+        console.log('[saveHashEthereum] The transaction %s has been mined', transactionHash, saveResult)
         this.setState({
           saving: false,
           statusMessage: {

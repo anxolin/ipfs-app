@@ -36,7 +36,7 @@ export default ({
       }
     }
     return {
-      ...data,
+      data,
       hash,
       version
     }
@@ -56,13 +56,18 @@ export default ({
     if (onUploadedIpfs) {
       onUploadedIpfs(hash)
     }
-    return hashRepo.saveHash({
+    const saveHashResult = await hashRepo.saveHash({
       account,
       hash,
       version,
       onTransactionHash,
       onError
     })
+
+    return {
+      hash,
+      ...saveHashResult
+    }
   }
 
 
