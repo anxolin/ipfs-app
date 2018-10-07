@@ -2,7 +2,8 @@
 Simple decentralised **To do** list App.
 
 ## Demo
-https://hungry-hugle-fe27e9.netlify.com/
+* Last version: https://hungry-hugle-fe27e9.netlify.com/
+* Fully decentralized (requires [Metamask](https://metamask.io) or any other ENS resolver): http://todo.angelrf.eth
 
 ## Features
 * **Data stored in IPFS**:
