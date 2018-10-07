@@ -71,7 +71,16 @@ class Todo extends React.Component {
         <div className="header">        
           <h2>
             <span role="img" aria-label="">✔️</span>&nbsp;
-            Decentralized <strong>To Do</strong> list</h2>
+            Decentralized <strong>To Do</strong> list
+            { this.props.networkName && (
+              <span className="details">
+                &nbsp;
+                <span>( </span>
+                <span className="network">{ this.props.networkName }</span>
+                <span> )</span>
+              </span>
+            )}
+          </h2>
           <input          
             value={ this.state.newItem }
             onChange={ event => this.setState({ newItem: event.target.value }) }

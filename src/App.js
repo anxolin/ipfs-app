@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import web3 from './util/web3'
 import ethPooling from './util/ethPooling'
+import networkNameById from './util/networkNameById'
 
 import todoApp from './api/todoApp'
 import TodoList from './components/TodoList'
@@ -19,6 +20,8 @@ class App extends Component {
       account: null,
       version: null,
       ipfsHash: null,
+      networkId: null,
+      networkName: null,
       statusMessage: {        
         type: null, // info, error, warning, success
         value: null // status message
@@ -60,6 +63,7 @@ class App extends Component {
         )}
         <TodoList
           items={ this.state.items }
+          networkName={ this.state.networkName }
           loading={ !this.state.dataReady }
           editable={ this.state.dataReady && !this.state.saving }
           onAddItem={ this.onAddItem }
@@ -105,10 +109,12 @@ class App extends Component {
     console.log('[App:initializeApp] Loading data...')
 
     ethPooling.onNetworkChange(networkId => {
+      const networkName = networkNameById(networkId)
       // console.log('[App:onNetworkChange] Change to network %d', networkId)
       const account = this.state.account
       this.setState({
-        networkId
+        networkId,
+        networkName
       })
       // Only get data if we have both the account and the network
       if (account && this.state.networkId) {
@@ -162,7 +168,7 @@ class App extends Component {
         dataReady: true,
         statusMessage: {
           type: 'warning',
-          value: 'The selected network is unknown. Please select Rinkeby or Kovan.',
+          value: 'The selected network is unknown. Please select Mainnet, Rinkeby or Kovan.',
           closable: false
         }
       })

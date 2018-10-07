@@ -83,6 +83,18 @@ ul li.checked::before {
   font-size: 1.2em;
 }
 
+.header .details {
+  margin-left: 0.5em;
+  font-size: 0.8em;
+}
+
+.header .network {
+  color: #ff4564;
+  text-transform: uppercase;
+  font-size: 0.7em;
+  letter-spacing: 0.2em;
+}
+
 /* Clear floats after the header */
 .header:after {
   content: "";
