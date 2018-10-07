@@ -2,8 +2,12 @@
 Simple decentralised **To do** list App.
 
 ## Demo
-* Last version: https://hungry-hugle-fe27e9.netlify.com/
-* Fully decentralized (requires [Metamask](https://metamask.io) or any other ENS resolver): http://todo.angelrf.eth
+* https://hungry-hugle-fe27e9.netlify.com/
+  * Last version. Deployed in Netlify
+* http://todo.angelrf.eth
+  * Fully decentralized
+  * Requires [Metamask](https://metamask.io) or any other ENS resolver
+  * IPFS hash: https://ipfs.infura.io/ipfs/QmYmWRUpHkvZ4JTjwxf4P2EtFkQdxLeNJdYoooRKc4WqqK 
 
 ## Features
 * **Data stored in IPFS**:
