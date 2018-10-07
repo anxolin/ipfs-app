@@ -10,6 +10,7 @@ ul {
 
 /* Style the list items */
 ul li {
+  color: #4c4c4c;
   cursor: pointer;
   position: relative;
   padding: 12px 8px 12px 40px;
@@ -73,8 +74,13 @@ ul li.checked::before {
 .header {
   background-color: #63698a;
   padding: 30px 40px;
-  color: white;
+  color: #e8eaff;
   text-align: center;
+}
+
+.header strong {
+  color: #ffc000;
+  font-size: 1.2em;
 }
 
 /* Clear floats after the header */
@@ -246,3 +252,35 @@ input {
   */
   animation-delay: .4s;
 }
+
+
+footer {
+  margin: 2em 0;
+  line-height: 1.5em;
+  text-align: center;
+}
+
+footer .copywrite {
+  margin: 0 auto;
+  display: inline-block;
+  color: #666666;
+}
+
+footer .copywrite span {
+  font-style: italic;
+  color: #a9a9a9;
+}
+
+footer .copywrite a {  
+  color: #666666;
+  text-decoration: none;
+}
+
+.smaller{
+  font-size: 0.85em;
+}
+
+footer .copywrite a:hover {
+  color: #cccccc;
+}
+

@@ -79,6 +79,24 @@ class App extends Component {
             </button>
           </div>
         )}
+        <footer>
+          <div className="copywrite">
+            <span>
+              Decentralized To do list
+              (<a target="_blank" rel="noopener noreferrer" href="https://github.com/anxolin/ipfs-app">
+                Github
+              </a>)
+            </span>
+            <br />
+            <span className="smaller">© 2018 Angel Rodriguez (
+              <a target="_blank" rel="noopener noreferrer" href="https://www.linkedin.com/in/angelrf/">
+              Linkedin
+              </a>,&nbsp;
+              <a target="_blank" rel="noopener noreferrer" href="https://github.com/anxolin">
+              Github
+              </a>)</span>            
+          </div>
+        </footer>
       </div>
     );
   }

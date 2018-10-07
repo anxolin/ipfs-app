@@ -63,7 +63,7 @@ class Todo extends React.Component {
     return (
       <div className="todo">
         <div className="header">
-          <h2>Decentralized todo list</h2>
+          <h2>✔️ Decentralized <strong>To Do</strong> list</h2>
           <input          
             value={ this.state.newItem }
             onChange={ event => this.setState({ newItem: event.target.value }) }
