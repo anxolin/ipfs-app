@@ -1,5 +1,5 @@
 import web3 from '../../util/web3'
-import ethNetworkUtils from '../../util/ethNetworkUtils'
+import ethPooling from '../../util/ethPooling'
 
 import multihash from '../../util/multihash'
 import abi from './ipfsAppABI.json'
@@ -118,7 +118,7 @@ function _createContract (networkId) {
   }
 }
 
-ethNetworkUtils.onNetworkChange(setNetworkId)
+ethPooling.onNetworkChange(setNetworkId)
 
 export default () => ({
   isSupportedNetwork,

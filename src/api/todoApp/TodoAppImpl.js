@@ -25,15 +25,21 @@ export default ({
       hashRepo.getVersion(account)
     ])
 
-    // Load JSON
-    const data = await _getJsonIpfs(hash)
-
+    let data
+    if (hash) {
+      // Load JSON
+      data = await _getJsonIpfs(hash)
+  
+    } else {
+      data = {
+        items: []
+      }
+    }
     return {
       ...data,
       hash,
       version
     }
-
   }
 
   async function saveData ({

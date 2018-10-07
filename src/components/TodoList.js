@@ -1,4 +1,6 @@
-const React = require('react')
+import React from 'react'
+import Loading from './Loading'
+
 class Todo extends React.Component {
   constructor (props) {
     super(props)
@@ -41,7 +43,7 @@ class Todo extends React.Component {
     let items
     if (this.props.loading) {
       items = (
-        <li>loading...</li>
+        <li><Loading message="Loading" /></li>
       )
     } else {
       items = this.props.items.map((item, index) => (
@@ -62,15 +64,19 @@ class Todo extends React.Component {
       <div className="todo">
         <div className="header">
           <h2>Decentralized todo list</h2>
-          <input
+          <input          
             value={ this.state.newItem }
             onChange={ event => this.setState({ newItem: event.target.value }) }
             onKeyPress={ this.onKeyPressForInput }
+            disabled={ !this.props.editable }
             type="text" id="myInput" placeholder="Title..."
           />
-          <span onClick={ this.onAddItem } className="btn addBtn">
+          <button
+            onClick={ this.onAddItem }
+            disabled={ !this.props.editable }
+            className="btn addBtn">
             Add
-          </span>
+          </button>
         </div>
 
         <ul>

@@ -1,10 +1,12 @@
-import React, { Component } from 'react';
+import React, { Component } from 'react'
 import web3 from './util/web3'
-import ethNetworkUtils from './util/ethNetworkUtils'
+import ethPooling from './util/ethPooling'
 
 import todoApp from './api/todoApp'
-import Todo from './components/todo/Todo'
+import TodoList from './components/TodoList'
 import update from 'immutability-helper'
+import Loading from './components/Loading'
+import EtherscanLink from './components/EtherscanLink'
 
 import './App.css';
 
@@ -12,11 +14,12 @@ class App extends Component {
   constructor (props) {
     super(props)
     this.state = {
-      ready: false,
+      dataReady: false,
+      saving: false,
       account: null,
       version: null,
-      ipfsHash: 'QmUSJ5bcfrau8uBA51eRpi4MmBxdHueo1fC7HNHVMDsuZQ',
-      statusMessage: {
+      ipfsHash: null,
+      statusMessage: {        
         type: null, // info, error, warning, success
         value: null // status message
       },
@@ -36,6 +39,15 @@ class App extends Component {
   }
 
   render() {
+    let btnLabel
+    if (this.state.saving) {
+      btnLabel = 'Saving'
+    } else if (this.state.ipfsHash) {
+      btnLabel = 'Save changes'
+    } else {
+      btnLabel = 'Create todo list'
+    }
+
     return (
       <div className="App">
         { this.state.statusMessage.value && (
@@ -46,21 +58,27 @@ class App extends Component {
             { this.state.statusMessage.value }
           </div>
         )}
-        <Todo
+        <TodoList
           items={ this.state.items }
-          loading={ !this.state.ready }
+          loading={ !this.state.dataReady }
+          editable={ this.state.dataReady && !this.state.saving }
           onAddItem={ this.onAddItem }
           onDeleteItem={ this.onDeleteItem }
           onToggleItem={ this.onToggleItem }
         />
-        <div className="buttons">
-          <button
-            disabled={ !this.state.ready || !this.state.hasChanges }
-            onClick={ this.saveChanges }
-            className="btn saveBtn">
-              { this.state.ipfsHash ? 'Save changes' : 'Publish todo list' }
-          </button>
-        </div>
+        { this.state.dataReady && (
+          <div className="buttons">
+            <button
+              disabled={ !this.state.dataReady || !this.state.hasChanges || this.state.saving }
+              onClick={ this.saveChanges }
+              className="btn saveBtn">
+                { btnLabel }
+                { this.state.saving &&
+                  <Loading />
+                }            
+            </button>
+          </div>
+        )}
       </div>
     );
   }
@@ -68,39 +86,38 @@ class App extends Component {
   async initializeApp () {
     console.log('[App:initializeApp] Loading data...')
 
-    ethNetworkUtils.onNetworkChange(networkId => {
+    ethPooling.onNetworkChange(networkId => {
       // console.log('[App:onNetworkChange] Change to network %d', networkId)
       const account = this.state.account
-      if (account) {
+      this.setState({
+        networkId
+      })
+      // Only get data if we have both the account and the network
+      if (account && this.state.networkId) {
         this
           .getData(account)
           .catch(this.handleLoadDataError)
       }
     })
 
-    this
-      // Load Ethereum account
-      .loadAccount()
-
-      // Load data for user
-      .then(async account => {
-        this.setState({
-          account
-        })
-
-        const networkId = ethNetworkUtils.getNetworkId()
-        if (networkId) {
-          this.getData(account)
-        }
+    ethPooling.onAccountChange(account => {
+      console.log('[App:onAccountChange] Change to account %s', account)
+      this.setState({
+        account
       })
-      // Handle data error
-      .catch(this.handleLoadDataError)
+      // Only get data if we have both the account and the network
+      if (account && this.state.networkId) {
+        this
+          .getData(account)
+          .catch(this.handleLoadDataError)
+      }
+    })
   }
 
   handleLoadDataError (error) {
     console.error(error)
     this.setState({
-      ready: true,
+      dataReady: true,
       statusMessage: {
         type: 'error',
         value: 'Error Loading the data: ' + error
@@ -117,14 +134,14 @@ class App extends Component {
       })
       console.log('[App:initializeApp] Data is ready', appData)
       this.setState({
-        ready: true,
+        dataReady: true,
         items: appData.items || [],
-        hash: appData.hash,
+        ipfsHash: appData.hash,
         version: appData.version
       })
     } else {
       this.setState({
-        ready: true,
+        dataReady: true,
         statusMessage: {
           type: 'warning',
           value: 'The selected network is unknown. Please select Rinkeby or Kovan.',
@@ -135,13 +152,36 @@ class App extends Component {
   }
 
   saveChanges () {
+    this.setState({
+      saving: true,
+      statusMessage: {
+        type: 'info',
+        value: <Loading message='Saving file' />,
+        closable: false
+      }
+    })
     this
       .saveData({
         items: this.state.items
       })
+      .then(saveResult => {
+        const transactionHash = saveResult.tx.transactionHash
+        console.log('[saveHashEthereum] The transaction %s has been mined', transactionHash, saveResult.tx)
+        this.setState({
+          saving: false,
+          statusMessage: {
+            type: 'success',
+            value: 'Nice! Your list has been saved :)'
+          },
+          ipfsHash: saveResult.hash,
+          hasChanges: false,
+        })
+      })
       .catch(error => {
         console.error(error)
         this.setState({
+          saving: false,
+          hasChanges: true,
           statusMessage: {
             type: 'error',
             value: 'Error saving data: ' + error
@@ -164,6 +204,24 @@ class App extends Component {
       onUploadedIpfs: hash => {
         this.setState({
           ipfsHash: hash,
+          statusMessage: {
+            type: 'info',
+            value: (
+              <div>                
+                <Loading message='Saving file' />
+                <div className="details">
+                  The list was&nbsp;
+                  <a
+                    href={ 'https://ipfs.infura.io/ipfs/' + hash }
+                    target="_blank"
+                    rel="noopener noreferrer" >
+                    uploaded to IPFS
+                  </a>. Please, sign the transaction to continue.
+                </div>
+              </div>
+            ),
+            closable: false
+          }
         })
       },
 
@@ -173,9 +231,16 @@ class App extends Component {
         this.setState({
           statusMessage: {
             type: 'info',
-            value: 'Saving list. Transaction: ' + transactionHash,
+            value: (
+              <div>
+                <Loading message="Saving list" /><br />
+                <div className="details">
+                  <EtherscanLink tx={ transactionHash } />                  
+                </div>
+              </div>
+            ),
             closable: false
-          },          
+          },  
           version: version + 1,
           hasChanges: false
         })
@@ -186,28 +251,18 @@ class App extends Component {
         console.error('[saveHashEthereum] Error saving. Reverting previous hash', error)
         this.setState({
           ipfsHash: previousIpfsHash,
-          version,
-          hasChanges: false
+          version
         })
       }
     })
 
-    const transactionHash = saveResult.tx.transactionHash
-    console.log('[saveHashEthereum] The transaction %s has been mined', transactionHash, saveResult.tx)
-    this.setState({
-      statusMessage: {
-        type: 'success',
-        value: 'Todo list was saved in IPFS with hash ' + saveResult.hash
-      },
-      ipfsHash: saveResult.hash,
-      hasChanges: false
-    })
+    return saveResult
   }
 
   async loadAccount () {
     console.log('[App:loadAccount] Load account...')
     const [ account ] = await web3.eth.getAccounts()
-    console.log('[App:loadAccount] Selected account: ', account)    
+    console.log('[App:loadAccount] Selected account: ', account)
 
     return account
   }
