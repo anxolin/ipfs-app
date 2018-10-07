@@ -22,6 +22,7 @@
     "network-extract": "npx truffle networks --clean && npx tnt extractNetworks",
     "network-inject": "npx tnt injectNetworks",
     "compile": "truffle compile",
+    "restore": "npm run compile && npm run network-inject",
     "migrate": "truffle migrate",
     "networks": "truffle networks"
   },

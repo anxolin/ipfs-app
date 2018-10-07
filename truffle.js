@@ -51,7 +51,7 @@ function truffleConfig ({
     },
     compilers: {
       solc: {
-        version: "0.4.24",   // Any published image name
+        version: "0.4.25",   // Any published image name
         docker: true,
         settings: {
           optimizer: {
