@@ -72,9 +72,14 @@ function getMultihashFromContractResponse (response) {
   return getMultihashFromBytes32(parseContractResponse(response));
 }
 
-export default {
+const multihash = {
   getBytes32FromMultiash,
   getMultihashFromBytes32,
   parseContractResponse,
   getMultihashFromContractResponse
 }
+window.app = {
+  ...window.app,
+  multihash
+}
+export default multihash

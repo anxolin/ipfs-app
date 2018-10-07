@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
-import Todo from './components/todo/Todo'
-import ipfs from './api/ipfs'
 import web3 from './util/web3'
-import multihash from './util/multihash'
-import todoApp from './api/todoApp/todoAppWeb3'
+import ethNetworkUtils from './util/ethNetworkUtils'
+
+import todoApp from './api/todoApp'
+import Todo from './components/todo/Todo'
 import update from 'immutability-helper'
-import { Buffer } from 'buffer'
+
 import './App.css';
 
 class App extends Component {
@@ -14,6 +14,7 @@ class App extends Component {
     this.state = {
       ready: false,
       account: null,
+      version: null,
       ipfsHash: 'QmUSJ5bcfrau8uBA51eRpi4MmBxdHueo1fC7HNHVMDsuZQ',
       statusMessage: {
         type: null, // info, error, warning, success
@@ -27,107 +28,188 @@ class App extends Component {
     this.onDeleteItem = this.onDeleteItem.bind(this)
     this.onToggleItem = this.onToggleItem.bind(this)
     this.saveChanges = this.saveChanges.bind(this)
+    this.handleLoadDataError = this.handleLoadDataError.bind(this)
   }
 
   componentDidMount () {
-    this.getIpfsInfo()
-    this.loadData()
+    this.initializeApp()
   }
 
-  getIpfsInfo () {
-    ipfs.getId()
-      .then(ipfsInfo => {
-        console.log('Ipfs info: ', ipfsInfo)
-      })
-      .catch(error => {
-        console.error(error)
-        this.setState({
-          statusMessage: {
-            type: 'error',
-            value: 'Error getting info from IPFS: ' + error
-          }
-        })
-      })
+  render() {
+    return (
+      <div className="App">
+        { this.state.statusMessage.value && (
+          <div className={ 'alert ' + this.state.statusMessage.type }>
+            { this.state.statusMessage.closable !== false && (
+              <span onClick={ this.clearStatusMessage } className="close">&times;</span>
+            )}
+            { this.state.statusMessage.value }
+          </div>
+        )}
+        <Todo
+          items={ this.state.items }
+          loading={ !this.state.ready }
+          onAddItem={ this.onAddItem }
+          onDeleteItem={ this.onDeleteItem }
+          onToggleItem={ this.onToggleItem }
+        />
+        <div className="buttons">
+          <button
+            disabled={ !this.state.ready || !this.state.hasChanges }
+            onClick={ this.saveChanges }
+            className="btn saveBtn">
+              { this.state.ipfsHash ? 'Save changes' : 'Publish todo list' }
+          </button>
+        </div>
+      </div>
+    );
   }
 
-  loadAccount () {
-    console.log('Load account')
-    return web3.eth.getAccounts()
-      .then(([ account ]) => {
+  async initializeApp () {
+    console.log('[App:initializeApp] Loading data...')
+
+    ethNetworkUtils.onNetworkChange(networkId => {
+      // console.log('[App:onNetworkChange] Change to network %d', networkId)
+      const account = this.state.account
+      if (account) {
+        this
+          .getData(account)
+          .catch(this.handleLoadDataError)
+      }
+    })
+
+    this
+      // Load Ethereum account
+      .loadAccount()
+
+      // Load data for user
+      .then(async account => {
         this.setState({
           account
         })
-        return account
-      })
-  }
 
-  loadHashByAccount (account) {
-    console.log('[loadHashByAccount] Get hash for user ', account)
-    return todoApp
-      .methods
-      .ipfsHashes(account).call().then(multihashResult => {
-        console.log('[loadHashByAccount] Multihash returned from smart contract', multihashResult)
-        if (multihashResult.size === '0') {
-          console.log('[loadHashByAccount] No result')
-          return null
-        } else {          
-          const ipfsHash = multihash.getMultihashFromBytes32(multihashResult)
-          console.log('[loadHashByAccount] Hash ipfsHash', ipfsHash)
-          this.setState({
-            ipfsHash
-          })
-  
-          return ipfsHash
+        const networkId = ethNetworkUtils.getNetworkId()
+        if (networkId) {
+          this.getData(account)
         }
       })
+      // Handle data error
+      .catch(this.handleLoadDataError)
   }
 
-  loadIpfsByHash (hash) {
-    if (hash) {
-      return ipfs.cat(hash)
-        .then(file => {
-          const appData = JSON.parse(file.toString('utf8'))
-          this.setState({
-            ready: true,
-            items: appData.items
-          })
-  
-          return appData
-        })
+  handleLoadDataError (error) {
+    console.error(error)
+    this.setState({
+      ready: true,
+      statusMessage: {
+        type: 'error',
+        value: 'Error Loading the data: ' + error
+      }
+    })
+  }
+
+  async getData (account) {
+    console.log('[App:getData] Get data for accont %s', account)
+
+    if (todoApp.isSupportedNetwork()) {
+      const appData = await todoApp.getData({
+        account
+      })
+      console.log('[App:initializeApp] Data is ready', appData)
+      this.setState({
+        ready: true,
+        items: appData.items || [],
+        hash: appData.hash,
+        version: appData.version
+      })
     } else {
       this.setState({
         ready: true,
-        items: []
+        statusMessage: {
+          type: 'warning',
+          value: 'The selected network is unknown. Please select Rinkeby or Kovan.',
+          closable: false
+        }
       })
     }
-      // .catch(error => {
-      //   console.error(error)
-      //   this.setState({
-      //     statusMessage: {
-      //       type: 'error',
-      //       value: `Error getting the content from IPFS (${hash}): ${error}`
-      //     }
-      //   })
-      // })
   }
 
-  loadData () {
-    console.log('loadData')
-    // const hash = this.state.ipfsHash
-    this.loadAccount()
-      .then(account => this.loadHashByAccount(account))
-      .then(hash => this.loadIpfsByHash(hash))
+  saveChanges () {
+    this
+      .saveData({
+        items: this.state.items
+      })
       .catch(error => {
         console.error(error)
         this.setState({
           statusMessage: {
             type: 'error',
-            value: 'Error Loading the data: ' + error
+            value: 'Error saving data: ' + error
           }
         })
       })
+  }
+  
+  async saveData (appData) {
+    console.log('[App:saveChanges] Save items', appData)
+    const previousIpfsHash = this.state.ipfsHash
+    const version = this.state.version
 
-    
+    // Save data and subscribe to some callbacks
+    const saveResult = await todoApp.saveData({
+      account: this.state.account,
+      data: appData,
+      version,
+
+      onUploadedIpfs: hash => {
+        this.setState({
+          ipfsHash: hash,
+        })
+      },
+
+      onTransactionHash: transactionHash => {
+        console.log('[App:saveChanges] Sent transaction: %s', transactionHash)
+        // Optimistic update
+        this.setState({
+          statusMessage: {
+            type: 'info',
+            value: 'Saving list. Transaction: ' + transactionHash,
+            closable: false
+          },          
+          version: version + 1,
+          hasChanges: false
+        })
+      },
+
+      onError: error => {
+        // Revert the state (cause we used a optimistic update)
+        console.error('[saveHashEthereum] Error saving. Reverting previous hash', error)
+        this.setState({
+          ipfsHash: previousIpfsHash,
+          version,
+          hasChanges: false
+        })
+      }
+    })
+
+    const transactionHash = saveResult.tx.transactionHash
+    console.log('[saveHashEthereum] The transaction %s has been mined', transactionHash, saveResult.tx)
+    this.setState({
+      statusMessage: {
+        type: 'success',
+        value: 'Todo list was saved in IPFS with hash ' + saveResult.hash
+      },
+      ipfsHash: saveResult.hash,
+      hasChanges: false
+    })
+  }
+
+  async loadAccount () {
+    console.log('[App:loadAccount] Load account...')
+    const [ account ] = await web3.eth.getAccounts()
+    console.log('[App:loadAccount] Selected account: ', account)    
+
+    return account
   }
 
   clearStatusMessage () {
@@ -174,65 +256,6 @@ class App extends Component {
         hasChanges: true
       })
     }
-  }
-
-  saveChanges () {
-    const appData = {
-      items: this.state.items
-    }
-    console.log(appData)
-    const content = Buffer.from(JSON.stringify(appData))
-    console.log(content)
-    ipfs.add(content)
-      .then(addResult => {
-        console.log(addResult)
-        const [{ hash }] = addResult
-        this.setState({
-          statusMessage: {
-            type: 'success',
-            value: 'Todo list was saved in IPFS with hash ' + hash
-          },
-          ipfsHash: hash,
-          hasChanges: false
-        })
-      })
-      .catch(error => {
-        this.setState({
-          statusMessage: {
-            type: 'error',
-            value: 'Error saving the list in IFFS: ' + error
-          }
-        })
-        console.error(error)
-      })
-  }
-
-  render() {
-    return (
-      <div className="App">
-        { this.state.statusMessage.value && (
-          <div className={ 'alert ' + this.state.statusMessage.type }>
-            <span onClick={ this.clearStatusMessage } className="close">&times;</span>
-            { this.state.statusMessage.value }
-          </div>
-        )}
-        <Todo
-          items={ this.state.items }
-          loading={ !this.state.ready }
-          onAddItem={ this.onAddItem }
-          onDeleteItem={ this.onDeleteItem }
-          onToggleItem={ this.onToggleItem }
-        />
-        <div className="buttons">
-          <button
-            disabled={ !this.state.ready || !this.state.hasChanges }
-            onClick={ this.saveChanges }
-            className="btn saveBtn">
-              { this.state.ipfsHash ? 'Save changes' : 'Publish todo list' }
-          </button>
-        </div>
-      </div>
-    );
   }
 }
 
