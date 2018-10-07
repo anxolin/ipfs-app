@@ -5,6 +5,12 @@
       "links": {},
       "address": "0xF7C8a3A93293de572CbD280F6da15ddB41f6E383",
       "transactionHash": "0x9b802b5928197e84b283b9b1c710232977c99b5e1920747609fa9c08fd2e773e"
+    },
+    "42": {
+      "events": {},
+      "links": {},
+      "address": "0x1C24EE5D410C46c4a9F966383606553E291D78Bd",
+      "transactionHash": "0xb1d390f827aa75dae367104cc66f3fc2a5e03eb6b4a33e505cbf87036b80680b"
     }
   },
   "Migrations": {
@@ -13,6 +19,12 @@
       "links": {},
       "address": "0x75Dd37E7b86c6787895E9b2b6D33C2f35D85e9A2",
       "transactionHash": "0xe5fcbce7c8338c21b7388292665ae533c0118377a0ee2e8562421bf906b9934f"
+    },
+    "42": {
+      "events": {},
+      "links": {},
+      "address": "0x98E3111206cf56897cE3812b6691980612194AAA",
+      "transactionHash": "0x50f7a665021f64786e1d1068de6c005569948504a04470a5d46240be970d27a6"
     }
   }
 }

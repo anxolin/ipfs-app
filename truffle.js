@@ -13,6 +13,7 @@ function truffleConfig ({
   optimizedEnabled = true,
   urlRinkeby = 'https://rinkeby.infura.io',
   urlMainnet = 'https://mainnet.infura.io',
+  urlKovan = 'https://kovan.infura.io',
   urlDevelopment = 'localhost',
   portDevelopment = 8545
 } = {}) {
@@ -45,6 +46,12 @@ function truffleConfig ({
       rinkeby: {
         provider: _getProvider(urlRinkeby),
         network_id: '4',
+        // gas,
+        gasPrice
+      },
+      kovan: {
+        provider: _getProvider(urlKovan),
+        network_id: '42',
         // gas,
         gasPrice
       }
