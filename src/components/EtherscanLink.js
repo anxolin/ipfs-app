@@ -18,8 +18,10 @@ class Loading extends React.Component {
       let baseUrl
       if (networkName === 'mainnet') {
         baseUrl = 'https://etherscan.io/tx/'
-      } else {
+      } else if (networkName) {
         baseUrl = 'https://' + networkName + '.etherscan.io/tx/'
+      } else {
+        baseUrl = null
       }
 
       this.setState({
@@ -29,8 +31,8 @@ class Loading extends React.Component {
   }
 
   render () {
-    const networkName = this.state.networkName
-    if (networkName) {
+    const baseUrl = this.state.baseUrl
+    if (baseUrl) {
       return (
         <a 
           className="details"
