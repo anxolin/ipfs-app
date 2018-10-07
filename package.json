@@ -35,6 +35,7 @@
     "eslint-plugin-standard": "^4.0.0",
     "truffle": "^5.0.0-beta.1"
   },
+  "homepage": ".",
   "eslintConfig": {
     "extends": "react-app"
   },
