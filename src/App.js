@@ -12,33 +12,53 @@ import EtherscanLink from './components/EtherscanLink'
 import './App.css';
 
 class App extends Component {
-  constructor (props) {
-    super(props)
-    this.state = {
-      dataReady: false,
-      saving: false,
-      account: null,
-      version: null,
-      ipfsHash: null,
-      networkId: null,
-      networkName: null,
-      statusMessage: {        
-        type: null, // info, error, warning, success
-        value: null // status message
-      },
-      hasChanges: false,
-      items: []
-    }
-    this.clearStatusMessage = this.clearStatusMessage.bind(this)
-    this.onAddItem = this.onAddItem.bind(this)
-    this.onDeleteItem = this.onDeleteItem.bind(this)
-    this.onToggleItem = this.onToggleItem.bind(this)
-    this.saveChanges = this.saveChanges.bind(this)
-    this.handleLoadDataError = this.handleLoadDataError.bind(this)
+  state = {
+    dataReady: false,
+    saving: false,
+    account: null,
+    version: null,
+    ipfsHash: null,
+    networkId: null,
+    networkName: null,
+    statusMessage: {        
+      type: null, // info, error, warning, success
+      value: null // status message
+    },
+    hasChanges: false,
+    items: []
   }
 
   componentDidMount () {
-    this.initializeApp()
+    console.log('[App:initializeApp] Loading data...')
+
+    ethPooling.onNetworkChange(networkId => {
+      const networkName = networkNameById(networkId)
+      // console.log('[App:onNetworkChange] Change to network %d', networkId)
+      const account = this.state.account
+      this.setState({
+        networkId,
+        networkName
+      })
+      // Only get data if we have both the account and the network
+      if (account && this.state.networkId) {
+        this
+          .getData(account)
+          .catch(this.handleLoadDataError)
+      }
+    })
+
+    ethPooling.onAccountChange(account => {
+      console.log('[App:onAccountChange] Change to account %s', account)
+      this.setState({
+        account
+      })
+      // Only get data if we have both the account and the network
+      if (account && this.state.networkId) {
+        this
+          .getData(account)
+          .catch(this.handleLoadDataError)
+      }
+    })
   }
 
   render() {
@@ -105,50 +125,6 @@ class App extends Component {
     );
   }
 
-  async initializeApp () {
-    console.log('[App:initializeApp] Loading data...')
-
-    ethPooling.onNetworkChange(networkId => {
-      const networkName = networkNameById(networkId)
-      // console.log('[App:onNetworkChange] Change to network %d', networkId)
-      const account = this.state.account
-      this.setState({
-        networkId,
-        networkName
-      })
-      // Only get data if we have both the account and the network
-      if (account && this.state.networkId) {
-        this
-          .getData(account)
-          .catch(this.handleLoadDataError)
-      }
-    })
-
-    ethPooling.onAccountChange(account => {
-      console.log('[App:onAccountChange] Change to account %s', account)
-      this.setState({
-        account
-      })
-      // Only get data if we have both the account and the network
-      if (account && this.state.networkId) {
-        this
-          .getData(account)
-          .catch(this.handleLoadDataError)
-      }
-    })
-  }
-
-  handleLoadDataError (error) {
-    console.error(error)
-    this.setState({
-      dataReady: true,
-      statusMessage: {
-        type: 'error',
-        value: 'Error Loading the data: ' + error
-      }
-    })
-  }
-
   async getData (account) {
     console.log('[App:getData] Get data for accont %s', account)
 
@@ -175,7 +151,18 @@ class App extends Component {
     }
   }
 
-  saveChanges () {
+  handleLoadDataError = (error) => {
+    console.error(error)
+    this.setState({
+      dataReady: true,
+      statusMessage: {
+        type: 'error',
+        value: 'Error Loading the data: ' + error
+      }
+    })
+  }
+
+  saveChanges = () => {
     this.setState({
       saving: true,
       statusMessage: {
@@ -291,7 +278,7 @@ class App extends Component {
     return account
   }
 
-  clearStatusMessage () {
+  clearStatusMessage = () => {
     this.setState({
       statusMessage: {
         type: null,
@@ -300,7 +287,7 @@ class App extends Component {
     })
   }
 
-  onAddItem (value) {    
+  onAddItem = (value) => {    
     var items = update(this.state.items, {
       $push: [{
         value,
@@ -313,7 +300,7 @@ class App extends Component {
     })
   }
 
-  onDeleteItem (item) {
+  onDeleteItem = (item) => {
     const items = this.state.items.filter(i => i !== item)
     this.setState({
       items,
@@ -321,7 +308,7 @@ class App extends Component {
     })
   }
 
-  onToggleItem (item) {
+  onToggleItem = (item) => {
     const index = this.state.items.findIndex(i => i === item)
 
     if (index !== -1) {

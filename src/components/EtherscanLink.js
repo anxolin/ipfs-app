@@ -4,12 +4,8 @@ import ethPooling from '../util/ethPooling'
 import networkNameById from '../util/networkNameById'
 
 class Loading extends React.Component {
-  constructor (props) {
-    super(props)
-
-    this.state = {
-      baseUrl: null
-    }
+  state = {
+    baseUrl: null
   }
 
   componentDidMount () {

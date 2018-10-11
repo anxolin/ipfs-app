@@ -2,20 +2,11 @@ import React from 'react'
 import Loading from './Loading'
 
 class Todo extends React.Component {
-  constructor (props) {
-    super(props)
-
-    this.state = {
-      newItem: ''
-    }
-
-    this.onAddItem = this.onAddItem.bind(this)
-    this.onDeleteItem = this.onDeleteItem.bind(this)
-    this.onToggleItem = this.onToggleItem.bind(this)
-    this.onKeyPressForInput = this.onKeyPressForInput.bind(this)
+  state = {
+    newItem: ''
   }
 
-  onAddItem (event) {
+  onAddItem = (event) => {
     event.stopPropagation()
     this.props.onAddItem(this.state.newItem)
     this.setState({
@@ -23,17 +14,17 @@ class Todo extends React.Component {
     })
   }
 
-  onDeleteItem (event, item) {
+  onDeleteItem = (event, item) => {
     event.stopPropagation()
     this.props.onDeleteItem(item)
   }
 
-  onToggleItem (event, item) {
+  onToggleItem = (event, item) => {
     event.stopPropagation()
     this.props.onToggleItem(item)
   }
 
-  onKeyPressForInput (event) {
+  onKeyPressForInput = (event) => {
     if (event.key === 'Enter') {
       this.onAddItem(event)
     }
